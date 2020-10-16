@@ -10,9 +10,10 @@ const bodyParser = require('body-parser')
 
 const app = new express();
 
-const Post = require('./database/models/Post')
+const Post = require('./DATABASE/models/Post')
 
 mongoose.connect("mongodb://localhost:27017/jsHackathon", {useNewUrlParser: true, useUnifiedTopology: true });
+
 
 
 
@@ -31,7 +32,8 @@ app.get('/posts/new', (req, res) => {
 })
 
 app.post('/posts/store', (req, res) => {
-    Post.create(req.body, (error, post) => {
+        console.log(req.body)
+        Post.create(req.body, (error, post) => {
         res.redirect('/')
     })
 })
@@ -39,16 +41,23 @@ app.post('/posts/store', (req, res) => {
 
 
 
-app.get('/', (req,res) => {
-    res.render('index')
+app.get('/', async (req,res) => {
+    const posts = await Post.find({})
+    console.log(posts)
+    res.render('index', {
+        posts
+    })
 })
 
 app.get('/about', (req,res) => {
     res.render('about')
 })
 
-app.get('/post', (req,res) => {
-    res.render('post')
+app.get('/post/:id', async (req,res) => {
+    const post = await Post.findById(req.params.id)
+    res.render('post', {
+        post
+    })
 })
 
 app.get('/contact', (req,res) => {

@@ -1,1 +1,0 @@
-module.exports = {database : "mongodb://myUsername:myPassword@ds161039.mlab.com:61039/accounttest"};
