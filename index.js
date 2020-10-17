@@ -1,21 +1,24 @@
-const path = require('path');
-
 const expressEdge = require('express-edge');
-
 const express = require('express');
-
 const mongoose = require('mongoose');
-
 const bodyParser = require('body-parser')
-
 const fileUpload = require('express-fileupload')
-
 const app = new express();
 
-const Post = require('./DATABASE/models/Post')
+const createPostController = require('./controllers/createPost')
+const homePageController = require('./controllers/homePage')
+const storePostController = require('./controllers/storePost')
+const getPostController = require('./controllers/getPost')
+const validateCreatePostMiddleware = require('./middleware/storePost')
+const createUserController = require('./controllers/createUser')
+const storeUserController = require('./controllers/storeUser')
+
+const Post = require('./DATABASE/models/Post');
+const { nextTick } = require('process');
+const storePost = require('./controllers/storePost');
+
 
 mongoose.connect("mongodb://localhost:27017/jsHackathon", {useNewUrlParser: true, useUnifiedTopology: true });
-
 
 
 
@@ -27,44 +30,18 @@ app.use(expressEdge.engine);
 app.set('views', `${__dirname}/views`);
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use('/posts/store', validateCreatePostMiddleware)
+app.use('/posts/store', storePost)
+
 
 //<----------------------ROUTES ----------------------------->
 
-app.get('/posts/new', (req, res) => {
-    res.render('create')
-})
-
-app.post("/posts/store", (req, res) => {
-        const { image } = req.files
-        
-        image.mv(path.resolve(__dirname, 'public/posts', image.name), (error) => {
-            Post.create(req.body, (error, post) => {
-                res.redirect("/");
-            });
-        })
-    })
-    
-
-
-
-app.get('/', async (req,res) => {
-    const posts = await Post.find({})
-    console.log(posts)
-    res.render('index', {
-        posts
-    })
-})
-
-app.get('/about', (req,res) => {
-    res.render('about')
-})
-
-app.get('/post/:id', async (req,res) => {
-    const post = await Post.findById(req.params.id)
-    res.render('post', {
-        post
-    })
-})
+app.get('/posts/new', createPostController);
+app.get('/', homePageController);
+app.post('/posts/store', storePostController);
+app.get('/post/:id', getPostController);
+app.get('/auth/register', createUserController);
+app.post('/users/register', storeUserController);
 
 app.get('/contact', (req,res) => {
     res.render('contact')
