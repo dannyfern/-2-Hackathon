@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
+const expressSession = require('express-session')
 const app = new express();
 
 const createPostController = require('./controllers/createPost')
@@ -12,6 +13,8 @@ const getPostController = require('./controllers/getPost')
 const validateCreatePostMiddleware = require('./middleware/storePost')
 const createUserController = require('./controllers/createUser')
 const storeUserController = require('./controllers/storeUser')
+const loginController = require('./controllers/login')
+const loginUserController = require('./controllers/loginUser')
 
 const Post = require('./DATABASE/models/Post');
 const { nextTick } = require('process');
@@ -32,6 +35,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/posts/store', validateCreatePostMiddleware)
 app.use('/posts/store', storePost)
+app.use(expressSession({
+    secret: 'secret'
+}))
 
 
 //<----------------------ROUTES ----------------------------->
@@ -41,7 +47,10 @@ app.get('/', homePageController);
 app.post('/posts/store', storePostController);
 app.get('/post/:id', getPostController);
 app.get('/auth/register', createUserController);
+app.get('/auth/login', loginController);
 app.post('/users/register', storeUserController);
+app.post('/users/login', loginUserController)
+
 
 app.get('/contact', (req,res) => {
     res.render('contact')
