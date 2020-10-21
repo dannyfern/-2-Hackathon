@@ -1,5 +1,6 @@
 const expressEdge = require('express-edge');
 const express = require('express');
+const edge = require('edge.js');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
@@ -22,6 +23,8 @@ const createUserController = require('./controllers/createUser')
 const storeUserController = require('./controllers/storeUser')
 const loginController = require('./controllers/login')
 const loginUserController = require('./controllers/loginUser')
+const logoutController = require('./controllers/logoutUser')
+const redirectAuth = require('./middleware/redirectAuth')
 const Post = require('./DATABASE/models/Post');
 const { nextTick } = require('process');
 const storePost = require('./controllers/storePost');
@@ -45,18 +48,24 @@ app.use(expressSession({
         mongooseConnection: mongoose.connection
     })
 }))
+app.use('*', (req ,res ,next) => {
+    edge.global('auth', req.session.userId)
+    next()
+})
 
 
 //<----------------------ROUTES ----------------------------->
 
 app.get('/posts/new', auth, createPostController);
 app.get('/', homePageController);
+app.get('/auth/logout' , redirectAuth, logoutController);
 app.post('/posts/store', auth, storePost, storePostController);
 app.get('/post/:id', getPostController);
-app.get('/auth/register', createUserController);
-app.get('/auth/login', loginController);
-app.post('/users/register', storeUserController);
-app.post('/users/login', loginUserController)
+app.get('/auth/register', redirectAuth, createUserController);
+app.get('/auth/login', redirectAuth, loginController);
+app.post('/users/register', redirectAuth, storeUserController);
+app.post('/users/login', redirectAuth, loginUserController)
+
 
 
 app.get('/contact', (req,res) => {
