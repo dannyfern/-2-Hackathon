@@ -1,4 +1,4 @@
-# -2-Hackathon
+# -2nd-Hackathon
 
 Second Hack-a-Thon with Coder Academy!
 
